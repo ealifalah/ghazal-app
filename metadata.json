@@ -1,0 +1,7 @@
+{
+  "name": "Top Notch AI Tutor",
+  "description": "An advanced English language tutor based on the Top Notch and Summit curriculum, supporting levels from Beginner to Advanced.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
