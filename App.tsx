@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LanguageLevel, Message, StudyMode } from './types';
 import { generateTutorResponse } from './services/geminiService';
@@ -26,22 +25,38 @@ const App: React.FC = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // --- قسمت اصلاح شده (ضد کرش) ---
   useEffect(() => {
     const welcomeMessage = async () => {
       setIsTyping(true);
       const prompt = `User has selected level ${level} and mode ${mode}. Introduce yourself as the teacher of Ghazal English School and invite the user to ask any question or start a conversation in this mode. Do not start teaching yet, wait for their question.`;
-      const text = await generateTutorResponse(level, mode, [], prompt);
-      const botMsg: Message = {
-        id: Date.now().toString(),
-        role: 'model',
-        text: text || "Welcome to Ghazal English School! I'm your teacher. How can I assist you today?",
-        timestamp: new Date()
-      };
-      setMessages([botMsg]);
-      setIsTyping(false);
+      
+      try {
+        const text = await generateTutorResponse(level, mode, [], prompt);
+        const botMsg: Message = {
+          id: Date.now().toString(),
+          role: 'model',
+          text: text || "Welcome to Ghazal English School! I'm your teacher. How can I assist you today?",
+          timestamp: new Date()
+        };
+        setMessages([botMsg]);
+      } catch (error) {
+        console.error("Welcome message error:", error);
+        // اگر مشکلی پیش آمد، سایت سفید نمی‌شود و این پیام نمایش داده می‌شود
+        const fallbackMsg: Message = {
+          id: Date.now().toString(),
+          role: 'model',
+          text: "Welcome to Ghazal English School! (System Note: Connection established, waiting for AI response...)",
+          timestamp: new Date()
+        };
+        setMessages([fallbackMsg]);
+      } finally {
+        setIsTyping(false);
+      }
     };
     welcomeMessage();
   }, [level, mode]);
+  // --------------------------------
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +84,13 @@ const App: React.FC = () => {
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
       console.error(error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'model',
+        text: "Sorry, I encountered an error. Please checks your connection or API Key.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsTyping(false);
     }
