@@ -1,16 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { LanguageLevel, Message, StudyMode } from "../types";
 
-// --- اصلاح مهم: خواندن کلید از متغیر استاندارد Vite ---
+// دریافت کلید API به روش استاندارد Vite
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 
-// چک کردن وجود کلید برای عیب‌یابی راحت‌تر
 if (!apiKey) {
   console.error("⛔ CRITICAL ERROR: API Key is missing! Please set VITE_GEMINI_API_KEY in Vercel Environment Variables.");
 }
 
 const ai = new GoogleGenAI({ apiKey });
-// -----------------------------------------------------
 
 const LEVEL_PROMPTS: Record<string, string> = {
   [LanguageLevel.B]: "The student is at Beginner level (Top Notch Fundamentals). Focus on basic greetings, alphabet, numbers, and simple present 'to be' verbs. Use basic vocabulary and present tense. Use 80% English, 20% Persian for explanations.",
@@ -35,7 +33,6 @@ export const generateTutorResponse = async (
   chatHistory: Message[],
   userInput: string
 ) => {
-  // مدل جمنای (می‌توانید به gemini-2.0-flash تغییر دهید اگر در دسترس بود)
   const modelName = 'gemini-2.0-flash-exp'; 
 
   const systemInstruction = `
@@ -66,7 +63,14 @@ export const generateTutorResponse = async (
     
   } catch (error) {
     console.error("Gemini API Error:", error);
-    // بازگرداندن متن خطا به جای کرش کردن
     throw error;
   }
+};
+
+// --- این تابع اضافه شد تا ارور بیلد رفع شود ---
+export const generateAudio = async (text: string): Promise<string | null> => {
+    // فعلاً یک مقدار خالی برمی‌گرداند تا بیلد موفق شود
+    // اگر بعداً نیاز به تبدیل متن به صدا داشتید، کدهای مربوطه اینجا قرار می‌گیرند
+    console.log("Audio generation requested (not implemented yet) for:", text);
+    return null;
 };
